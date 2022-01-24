@@ -1,9 +1,17 @@
 const SHA256 = require('crypto-js/sha256');
+
+class Transaction {
+    constructor(fromAddress, toAddress, amount) {
+        this.fromAddress = fromAddress;
+        this.toAddress = toAddress;
+        this.amount = amount;
+    }
+}
+
 class Block {
-    constructor(index, timestamp, data, previousHash = '') {
-        this.index = index;
+    constructor(timestamp, transactions, previousHash = '') {
         this.timestamp = timestamp;
-        this.data = data;
+        this.transactions = transactions;
         this.previousHash = previousHash;
         this.hash = this.calculateHash();
         this.nonce = 0;
@@ -25,26 +33,63 @@ class Block {
     }
 }
 
-class BLockchain {
+class Blockchain {
     constructor() {
         this.chain = [this.createGenesisBlock()];
-        this.difficulty = 5; // mining difficulty
+        this.difficulty = 2; // mining difficulty
+        this.pendingTransactions = [];
+        this.miningReward = 100.0; // incentive to create new blocks
     }
 
     createGenesisBlock() {
-        return new Block(0, "09/09/1999", "Genesis block", "0");
+        return new Block("09/09/1999", "Genesis block", "0");
     }
 
     getLatestBlock() {
         return this.chain[this.chain.length - 1];
     }
 
-    addBlock(newBlock) {
+    addBlock(newBlock) { // mining method
         newBlock.previousHash = this.getLatestBlock().hash;
         // newBlock.hash = newBlock.calculateHash();
         newBlock.mineBlock(this.difficulty);
         this.chain.push(newBlock);
     }
+
+    // new method to replace addBlock
+    minePendingTransactions(miningRewardAddress) {
+        // send a reward for miner
+        let block = new Block(Date.now(), this.pendingTransactions);
+        block.mineBlock(this.difficulty);
+        this.chain.push(block);
+
+        // reward
+        this.pendingTransactions = [
+            new Transaction(null, miningRewardAddress, this.miningReward)
+        ];
+    }
+
+    createTransaction(transaction) {
+        this.pendingTransactions.push(transaction);
+    }
+
+    getBalanceOfAddress(address) {
+        let balance = 0;
+        for (const block of this.chain) {
+            for (const trans of block.transactions) {
+                if (trans.fromAddress === address) {
+                    balance -= trans.amount;
+                }
+                if (trans.toAddress === address) {
+                    balance += trans.amount;
+                }
+            }
+        }
+        return balance;
+    }
+
+
+
 
     isChainValid() {
         for (let i = 1; i < this.chain.length; i++) {
@@ -64,12 +109,19 @@ class BLockchain {
 }
 
 
-let dr_bc = new BLockchain();
+let awe_bc = new Blockchain();
+awe_bc.createTransaction(new Transaction("publick key ; address1", "address2", 100));
+awe_bc.createTransaction(new Transaction("ruben99", "address1", 50));
 
-console.log("Mining block 1...");
-dr_bc.addBlock(new Block(1, "23/01/2022", { amount: 4 }));
-console.log("Mining block 2...");
-dr_bc.addBlock(new Block(2, "24/01/2022", { amount: 10 }));
+console.log("Starting miner...");
+awe_bc.minePendingTransactions("ruben99");
+
+console.log("Balance of Ruben van Breda is ", awe_bc.getBalanceOfAddress("ruben99"));
 
 
+
+console.log("Starting miner...");
+awe_bc.minePendingTransactions("ruben99");
+
+console.log("Balance of Ruben van Breda is ", awe_bc.getBalanceOfAddress("ruben99"));
 

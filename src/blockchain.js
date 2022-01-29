@@ -33,6 +33,9 @@ class Block {
     }
 }
 
+
+
+
 class Blockchain {
     constructor() {
         this.chain = [this.createGenesisBlock()];
@@ -108,20 +111,5 @@ class Blockchain {
     }
 }
 
-
-let awe_bc = new Blockchain();
-awe_bc.createTransaction(new Transaction("publick key ; address1", "address2", 100));
-awe_bc.createTransaction(new Transaction("ruben99", "address1", 50));
-
-console.log("Starting miner...");
-awe_bc.minePendingTransactions("ruben99");
-
-console.log("Balance of Ruben van Breda is ", awe_bc.getBalanceOfAddress("ruben99"));
-
-
-
-console.log("Starting miner...");
-awe_bc.minePendingTransactions("ruben99");
-
-console.log("Balance of Ruben van Breda is ", awe_bc.getBalanceOfAddress("ruben99"));
-
+module.exports.Blockchain = Blockchain;
+module.exports.Transaction = Transaction;
